@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using AsterNET.ARI.Middleware.Queue.Messages;
@@ -49,8 +50,11 @@ namespace AsterNET.ARI.Middleware.Queue
 
             var tcs = new TaskCompletionSource<CommandResult>();
             _openRequests.Add(command.UniqueId, tcs);
-
-            _actionRequestConsumer.PushToQueue(JsonConvert.SerializeObject(proxyCommand));
+            var request = JsonConvert.SerializeObject(proxyCommand);
+#if DEBUG
+            Debug.WriteLine(request);
+#endif
+            _actionRequestConsumer.PushToQueue(request);
 
             // await for the result
             var result = tcs.Task.Result;
@@ -77,8 +81,11 @@ namespace AsterNET.ARI.Middleware.Queue
 
             var tcs = new TaskCompletionSource<CommandResult>();
             _openRequests.Add(command.UniqueId, tcs);
-
-            _actionRequestConsumer.PushToQueue(JsonConvert.SerializeObject(proxyCommand));
+            var request = JsonConvert.SerializeObject(proxyCommand);
+#if DEBUG
+            Debug.WriteLine(request);
+#endif
+            _actionRequestConsumer.PushToQueue(request);
 
             // await for the result
             var result = tcs.Task.Result;
@@ -93,6 +100,9 @@ namespace AsterNET.ARI.Middleware.Queue
 
         protected void OnAppDequeue(string message, IConsumer sender, ulong deliveryTag)
         {
+#if DEBUG
+            Debug.WriteLine(message);
+#endif
             var restResponse = (CommandResult) JsonConvert.DeserializeObject(message, typeof (CommandResult));
             if (!_openRequests.ContainsKey(restResponse.UniqueId))
                 return;
