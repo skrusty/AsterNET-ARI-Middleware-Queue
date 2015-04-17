@@ -125,7 +125,14 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
             Connection.Close();
         }
 
-        public void Dispose()
+	    public void Terminate()
+	    {
+		    StopReading();
+		    Model.QueueDelete(QueueName, false, false);
+		    Close();
+	    }
+
+	    public void Dispose()
         {
             Connection.Close();
         }
@@ -173,7 +180,13 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
             Connection.Close();
         }
 
-        private void CreateModel()
+	    public void Teminate()
+	    {
+			Model.QueueDelete(QueueName, false, false);
+		    Close();
+	    }
+
+	    private void CreateModel()
         {
             Model = Connection.CreateModel();
         }

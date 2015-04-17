@@ -316,11 +316,26 @@ namespace AsterNET.ARI.Middleware.Queue
             EventQueue.Close();
         }
 
+	    public void CloseDialogue()
+	    {
+		    // delete all queues
+		    EventQueue.Terminate();
+		    ActionRequestQueue.Teminate();
+		    ActionResponseQueue.Terminate();
+			// remove active dialogue
+		    _client.ActiveDialogs.Remove(DialogueId);
+	    }
+
         private delegate void AriEventHandler(IAriClient sender, Event e);
 
         #region Public Properties
 
-        public string DialogueId { get; set; }
+	    public AriBrokerClient Client
+	    {
+		    get { return _client; }
+	    }
+
+	    public string DialogueId { get; set; }
         public string ServerId { get; set; }
         public IConsumer EventQueue { get; set; }
         public IConsumer ActionResponseQueue { get; set; }

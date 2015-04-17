@@ -14,6 +14,7 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
         string DialogId { get; set; }
         void PushToQueue(string message);
         void Close();
+	    void Teminate();
     }
 
     public interface IConsumer
@@ -38,5 +39,6 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
 
         void StopReading();
         void Close();
+	    void Terminate();
     }
 }
