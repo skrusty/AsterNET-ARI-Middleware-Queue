@@ -98,17 +98,19 @@ namespace AsterNET.ARI.Middleware.Queue
             return rtn;
         }
 
-        protected void OnAppDequeue(string message, IConsumer sender, ulong deliveryTag)
+        protected MessageFinalResponse OnAppDequeue(string message, IConsumer sender, ulong deliveryTag)
         {
 #if DEBUG
             Debug.WriteLine(message);
 #endif
             var restResponse = (CommandResult) JsonConvert.DeserializeObject(message, typeof (CommandResult));
-            if (!_openRequests.ContainsKey(restResponse.UniqueId))
-                return;
+			if (!_openRequests.ContainsKey(restResponse.UniqueId))
+				return MessageFinalResponse.Reject;
 
             // Complete the request flow back to the originating Process command
             _openRequests[restResponse.UniqueId].SetResult(restResponse);
+
+	        return MessageFinalResponse.Accept;
         }
 
         protected void OnError(Exception ex, IConsumer sender, ulong deliveryTag)

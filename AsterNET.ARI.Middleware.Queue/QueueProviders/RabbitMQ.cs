@@ -90,7 +90,7 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
         /// </summary>
         /// <param name="onDequeue">The action to take when receiving a message</param>
         /// <param name="onError">If an error occurs, provide an action to take.</param>
-        public void ReadFromQueue(Action<string, IConsumer, ulong> onDequeue,
+        public void ReadFromQueue(Func<string, IConsumer, ulong, MessageFinalResponse> onDequeue,
             Action<Exception, IConsumer, ulong> onError)
         {
             _consumer = new EventingBasicConsumer(Model);
@@ -101,8 +101,20 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
                 try
                 {
                     var queuedMessage = Encoding.ASCII.GetString(e.Body);
-                    onDequeue.Invoke(queuedMessage, this, e.DeliveryTag);
-                    Model.BasicAck(e.DeliveryTag, false);
+					var accepted = onDequeue.Invoke(queuedMessage, this, e.DeliveryTag);
+
+					switch (accepted)
+					{
+						case MessageFinalResponse.Accept:
+							Model.BasicAck(e.DeliveryTag, false);
+							break;
+						case MessageFinalResponse.RejectWithReQueue:
+							Model.BasicReject(e.DeliveryTag, true);
+							break;
+						case MessageFinalResponse.Reject:
+							Model.BasicReject(e.DeliveryTag, false);
+							break;
+					}
                 }
                 catch (Exception ex)
                 {

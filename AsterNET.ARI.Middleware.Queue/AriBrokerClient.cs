@@ -24,6 +24,12 @@ namespace AsterNET.ARI.Middleware.Queue
         internal Assembly Asm;
 
         public event EventHandler<BrokerSession> OnNewDialogue;
+		/// <summary>
+		/// ActiveDialogueLimit restricts the number of active dialogue on the client to rejecting (with requeue)
+		/// any new dialogues that are presentde after the limit has been reached. Once there is room for new
+		/// dialogues, they will be accepted again.
+		/// </summary>
+		public int ActiveDialogueLimit { get; set; }
 
         public AriBrokerClient(string appName, IQueueProvider queueProvider)
         {
@@ -38,6 +44,9 @@ namespace AsterNET.ARI.Middleware.Queue
             // Setup assembly search for event models
             // NOTE: this should maybe come from a central source, as this could get messy
             Asm = AppDomain.CurrentDomain.GetAssemblies().ToList().Single(x => x.GetName().Name == "AsterNET.ARI");
+
+			// Set default dialogue limit
+	        ActiveDialogueLimit = 50;
         }
 
         public void Connect()
@@ -60,13 +69,20 @@ namespace AsterNET.ARI.Middleware.Queue
             get { return _applicationQueues; }
         }
 
-        protected void OnDequeue(string message, IConsumer sender, ulong deliveryTag)
+        protected MessageFinalResponse OnDequeue(string message, IConsumer sender, ulong deliveryTag)
         {
 #if DEBUG
             Debug.WriteLine(message);
 #endif
 
-            // A new instance has been passed to us
+			// Check Dialogue Limit
+	        if (ActiveDialogs.Count >= ActiveDialogueLimit)
+	        {
+		        Debug.WriteLine("Rejected new dialogue due to ActiveDialogueLimit ({0}) being exceeded {1}", ActiveDialogueLimit, ActiveDialogs.Count);
+		        return MessageFinalResponse.RejectWithReQueue; // Requeue dialogue
+	        }
+
+	        // A new instance has been passed to us
             var newInstance =
                 (NewDialogInfo) JsonConvert.DeserializeObject(message, typeof (NewDialogInfo));
             
@@ -87,6 +103,8 @@ namespace AsterNET.ARI.Middleware.Queue
 
             // Start the event runner
             newApp.Start();
+
+	        return MessageFinalResponse.Accept;
         }
 
         protected void OnError(Exception ex, IConsumer sender, ulong deliveryTag)

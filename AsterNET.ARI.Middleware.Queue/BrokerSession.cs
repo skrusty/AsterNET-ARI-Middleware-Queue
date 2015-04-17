@@ -52,7 +52,7 @@ namespace AsterNET.ARI.Middleware.Queue
 
         private event AriEventHandler InternalEvent;
 
-        protected void OnAppDequeue(string message, IConsumer sender, ulong deliveryTag)
+        protected MessageFinalResponse OnAppDequeue(string message, IConsumer sender, ulong deliveryTag)
         {
 #if DEBUG
             Debug.WriteLine(message);
@@ -86,6 +86,8 @@ namespace AsterNET.ARI.Middleware.Queue
                 Debug.WriteLine("Raise Event Failed: ", ex.Message);
 #endif
             }
+
+	        return MessageFinalResponse.Accept;
         }
 
         protected void OnError(Exception ex, IConsumer sender, ulong deliveryTag)

@@ -2,6 +2,12 @@
 
 namespace AsterNET.ARI.Middleware.Queue.QueueProviders
 {
+	public enum MessageFinalResponse
+	{
+		Accept,
+		Reject,
+		RejectWithReQueue
+	}
     public interface IQueueProvider
     {
         IConsumer CreateConsumer(string queueName, string dialogId);
@@ -35,7 +41,7 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
         /// <param name="exchangeName">Name of the exchange.</param>
         /// <param name="queueName">Name of the queue.</param>
         /// <param name="routingKeyName">Name of the routing key.</param>
-        void ReadFromQueue(Action<string, IConsumer, ulong> onDequeue, Action<Exception, IConsumer, ulong> onError);
+        void ReadFromQueue(Func<string, IConsumer, ulong, MessageFinalResponse> onDequeue, Action<Exception, IConsumer, ulong> onError);
 
         void StopReading();
         void Close();
