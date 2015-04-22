@@ -296,7 +296,21 @@ namespace AsterNET.ARI.Middleware.Queue
                     if (OnStasisStartEvent != null)
                         OnStasisStartEvent(sender, (StasisStartEvent) eventArgs);
                     break;
-                default:
+
+
+				case "TextMessageReceived":
+					if (OnTextMessageReceivedEvent != null)
+						OnTextMessageReceivedEvent(sender, (TextMessageReceivedEvent)eventArgs);
+					break;
+
+
+				case "ChannelConnectedLine":
+					if (OnChannelConnectedLineEvent != null)
+						OnChannelConnectedLineEvent(sender, (ChannelConnectedLineEvent)eventArgs);
+					break;
+
+
+				default:
                     if (OnUnhandledEvent != null)
                         OnUnhandledEvent(this, (Event) eventArgs);
                     break;
@@ -386,7 +400,9 @@ namespace AsterNET.ARI.Middleware.Queue
         public event DialEventHandler OnDialEvent;
         public event StasisEndEventHandler OnStasisEndEvent;
         public event StasisStartEventHandler OnStasisStartEvent;
-        public event UnhandledEventHandler OnUnhandledEvent;
+	    public event TextMessageReceivedEventHandler OnTextMessageReceivedEvent;
+	    public event ChannelConnectedLineEventHandler OnChannelConnectedLineEvent;
+	    public event UnhandledEventHandler OnUnhandledEvent;
 
         #endregion
     }
