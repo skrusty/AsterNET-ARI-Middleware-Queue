@@ -13,7 +13,7 @@ namespace QueueTest
             
             // Create Ari client that handles brokered messages (unlike standard AriClient)
             // This will help to ensure correlation is supported in our message flow
-            var ari = new AriBrokerClient("paladin-queue-test",
+            var ari = new AriBrokerClient("test",
                 new RabbitMq("amqp://", new RabbitMqOptions()
                 {
                     AutoDelete = false,
