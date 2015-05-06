@@ -65,14 +65,14 @@ namespace AsterNET.ARI.Middleware.Queue
                     throw new NotImplementedException();
                     break;
                 case ParameterType.QueryString:
-                    AddQueryString(name, value.ToString());
+                    AddQueryString(name, value);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("type");
             }
         }
 
-        private void AddQueryString(string name, string value)
+        private void AddQueryString(string name, object value)
         {
             var qP = QueryString as IDictionary<string, object>;
             qP[name] = value;
