@@ -51,7 +51,7 @@ namespace AsterNET.ARI.Middleware.Queue
 
         public void Connect()
         {
-            _applicationPrimaryConsumer = _queueProvider.CreateConsumer(_appName, "");
+            _applicationPrimaryConsumer = _queueProvider.CreateAppConsumer(_appName);
             _applicationPrimaryConsumer.ReadFromQueue(OnDequeue, OnError);
         }
 

@@ -16,6 +16,13 @@ namespace QueueTest
             var ari = new AriBrokerClient("test",
                 new RabbitMq("amqp://", new RabbitMqOptions()
                 {
+                    // App Queue Options
+                    AutoDelete = false,
+                    Durable = true,
+                    Exclusive = false
+                }, new RabbitMqOptions()
+                {
+                    // Dialogue Queue Options
                     AutoDelete = false,
                     Durable = true,
                     Exclusive = false

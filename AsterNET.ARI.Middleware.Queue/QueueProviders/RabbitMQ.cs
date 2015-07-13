@@ -11,29 +11,44 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
     /// </summary>
     public class RabbitMq : IQueueProvider
     {
-        private readonly RabbitMqOptions _options;
+        private readonly RabbitMqOptions _dialogueQueueOptions;
+        private readonly RabbitMqOptions _appQueueOptions;
         private readonly ConnectionFactory _rmqConnection;
 
         public RabbitMq(string amqp)
         {
             _rmqConnection = new ConnectionFactory {uri = new Uri(amqp)};
-            _options = new RabbitMqOptions()
+            _dialogueQueueOptions = new RabbitMqOptions()
             {
                 AutoDelete = false,
                 Durable = true,
                 Exclusive = false
             };
+            _appQueueOptions = _dialogueQueueOptions;
         }
 
         public RabbitMq(string amqp, RabbitMqOptions options)
         {
             _rmqConnection = new ConnectionFactory { uri = new Uri(amqp) };
-            _options = options;
+            _dialogueQueueOptions = options;
+            _appQueueOptions = options;
+        }
+
+        public RabbitMq(string amqp, RabbitMqOptions appQueueOptions, RabbitMqOptions diagQueueOptions)
+        {
+            _rmqConnection = new ConnectionFactory { uri = new Uri(amqp) };
+            _appQueueOptions = appQueueOptions;
+            _dialogueQueueOptions = diagQueueOptions;
+        }
+
+        public IConsumer CreateAppConsumer(string applicationName)
+        {
+            return new RabbitMqConsumer(_rmqConnection.CreateConnection(), applicationName, _appQueueOptions);
         }
 
         public IConsumer CreateConsumer(string queueName, string dialogId)
         {
-            return new RabbitMqConsumer(_rmqConnection.CreateConnection(), queueName, _options)
+            return new RabbitMqConsumer(_rmqConnection.CreateConnection(), queueName, _dialogueQueueOptions)
             {
                 DialogId = dialogId
             };
@@ -41,7 +56,7 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
 
         public IProducer CreateProducer(string queueName, string dialogId)
         {
-            return new RabbitMqProducer(_rmqConnection.CreateConnection(), queueName, _options)
+            return new RabbitMqProducer(_rmqConnection.CreateConnection(), queueName, _dialogueQueueOptions)
             {
                 DialogId = dialogId
             };

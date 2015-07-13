@@ -10,7 +10,27 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
 	}
     public interface IQueueProvider
     {
+        /// <summary>
+        /// Create the consumer which will read in new dialogue messages from the provider
+        /// </summary>
+        /// <param name="applicationName"></param>
+        /// <returns></returns>
+        IConsumer CreateAppConsumer(string applicationName);
+
+        /// <summary>
+        /// Create a new consumer that will read in new events from a dialogue
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <param name="dialogId"></param>
+        /// <returns></returns>
         IConsumer CreateConsumer(string queueName, string dialogId);
+
+        /// <summary>
+        /// Create a new producer that will push new messages to the provider for a dialogue
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <param name="dialogId"></param>
+        /// <returns></returns>
         IProducer CreateProducer(string queueName, string dialogId);
     }
 
