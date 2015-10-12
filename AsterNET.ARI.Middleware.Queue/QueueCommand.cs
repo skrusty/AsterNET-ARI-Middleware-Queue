@@ -62,13 +62,13 @@ namespace AsterNET.ARI.Middleware.Queue
                 case ParameterType.HttpHeader:
                     break;
                 case ParameterType.RequestBody:
-                    throw new NotImplementedException();
+                    AddQueryString("variables", value);
                     break;
                 case ParameterType.QueryString:
                     AddQueryString(name, value);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("type");
+                    throw new ArgumentOutOfRangeException(nameof(type));
             }
         }
 

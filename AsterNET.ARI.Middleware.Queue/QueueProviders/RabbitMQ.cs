@@ -155,7 +155,7 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
 	    public void Terminate()
 	    {
 		    StopReading();
-		    Model.QueueDelete(QueueName, false, false);
+		    //Model.QueueDelete(QueueName, false, false);
 		    Close();
 	    }
 
@@ -197,6 +197,8 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
 
         public void PushToQueue(string message)
         {
+            if (!CheckState())
+                throw new DialogueClosedException();
             var body = Encoding.UTF8.GetBytes(message);
 
             Model.BasicPublish("", QueueName, null, body);
@@ -209,7 +211,7 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
 
 	    public void Teminate()
 	    {
-			Model.QueueDelete(QueueName, false, false);
+			// Model.QueueDelete(QueueName, false, false);
 		    Close();
 	    }
 
@@ -217,6 +219,24 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
         {
             Model = Connection.CreateModel();
         }
+
+        public bool CheckState()
+        {
+            try
+            {
+                Model.QueueDeclarePassive(QueueName);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+
+    public class DialogueClosedException : Exception
+    {
+        public string DialogueId { get; set; }
     }
 
     public class RabbitMqOptions

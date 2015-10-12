@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using AsterNET.ARI.Middleware.Queue.Messages;
 using AsterNET.ARI.Middleware.Queue.QueueProviders;
@@ -14,11 +16,13 @@ namespace AsterNET.ARI.Middleware.Queue
         private readonly IProducer _actionRequestConsumer;
         private readonly IConsumer _actionResponseProducer;
         private readonly Dictionary<string, TaskCompletionSource<CommandResult>> _openRequests;
+        private readonly int _actionTimeout;
 
-        public ActionConsumer(IProducer actionRequestConsumer, IConsumer actionResponseProducer)
+        public ActionConsumer(IProducer actionRequestConsumer, IConsumer actionResponseProducer, int actionTimeout = 1000)
         {
             _actionRequestConsumer = actionRequestConsumer;
             _actionResponseProducer = actionResponseProducer;
+            _actionTimeout = actionTimeout;
 
             _openRequests = new Dictionary<string, TaskCompletionSource<CommandResult>>();
         }
@@ -40,62 +44,118 @@ namespace AsterNET.ARI.Middleware.Queue
 
         public IRestCommandResult<T> ProcessRestCommand<T>(IRestCommand command) where T : new()
         {
-            var proxyCommand = new Command
+            try
             {
-                Method = command.Method,
-                UniqueId = command.UniqueId,
-                Url = command.Url,
-                Body = command.Body
-            };
+                var proxyCommand = new Command
+                {
+                    Method = command.Method,
+                    UniqueId = command.UniqueId,
+                    Url = command.Url,
+                    Body = command.Body
+                };
 
-            var tcs = new TaskCompletionSource<CommandResult>();
-            _openRequests.Add(command.UniqueId, tcs);
-            var request = JsonConvert.SerializeObject(proxyCommand);
+                var tcs = new TaskCompletionSource<CommandResult>();
+                var ct = new CancellationTokenSource(_actionTimeout);
+                ct.Token.Register(() =>
+                {
+                    tcs.TrySetCanceled();
+                }, useSynchronizationContext: false);
+
+                _openRequests.Add(command.UniqueId, tcs);
+                var request = JsonConvert.SerializeObject(proxyCommand);
 #if DEBUG
-            Debug.WriteLine(request);
+                Debug.WriteLine(request);
 #endif
-            _actionRequestConsumer.PushToQueue(request);
 
-            // await for the result
-            var result = tcs.Task.Result;
-            var rtn = new QueueCommandResult<T>
+                _actionRequestConsumer.PushToQueue(request);
+
+                // await for the result
+                var result = tcs.Task.Result;
+                var rtn = new QueueCommandResult<T>
+                {
+                    UniqueId = result.UniqueId,
+                    StatusCode = (HttpStatusCode) result.StatusCode
+                };
+                if (!string.IsNullOrEmpty(result.ResponseBody))
+                    rtn.Data = JsonConvert.DeserializeObject<T>(result.ResponseBody);
+
+                return rtn;
+            }
+            catch (TaskCanceledException tEx)
             {
-                UniqueId = result.UniqueId,
-                StatusCode = (HttpStatusCode) result.StatusCode
-            };
-            if (!string.IsNullOrEmpty(result.ResponseBody))
-                rtn.Data = JsonConvert.DeserializeObject<T>(result.ResponseBody);
+                // Task was cancelled!
+#if DEBUG
+                Debug.WriteLine("Setting cancellation token for action {0} on dialogue {1}", command.Url, _actionRequestConsumer.DialogId);
+#endif
+                return null;
+            }
+            catch (DialogueClosedException dEx)
+            {
+#if DEBUG
+                Debug.WriteLine("Tried to execute action {0} on dialogue {1} but Dialogue was closed.", command.Url, _actionRequestConsumer.DialogId);
+#endif
+                return null;
+            }
 
-            return rtn;
         }
 
         public IRestCommandResult ProcessRestCommand(IRestCommand command)
         {
-            var proxyCommand = new Command
+            try
             {
-                Method = command.Method,
-                UniqueId = command.UniqueId,
-                Url = command.Url,
-                Body = command.Body
-            };
+                var proxyCommand = new Command
+                {
+                    Method = command.Method,
+                    UniqueId = command.UniqueId,
+                    Url = command.Url,
+                    Body = command.Body
+                };
 
-            var tcs = new TaskCompletionSource<CommandResult>();
-            _openRequests.Add(command.UniqueId, tcs);
-            var request = JsonConvert.SerializeObject(proxyCommand);
+                var tcs = new TaskCompletionSource<CommandResult>();
+                var ct = new CancellationTokenSource(_actionTimeout);
+                ct.Token.Register(() =>
+                {
+                    tcs.TrySetCanceled();
+                }, useSynchronizationContext: false);
+
+                _openRequests.Add(command.UniqueId, tcs);
+                var request = JsonConvert.SerializeObject(proxyCommand);
 #if DEBUG
-            Debug.WriteLine(request);
-#endif
-            _actionRequestConsumer.PushToQueue(request);
+                Debug.WriteLine(request);
+    #endif
+                _actionRequestConsumer.PushToQueue(request);
 
-            // await for the result
-            var result = tcs.Task.Result;
-            var rtn = new QueueCommandResult
+                // await for the result
+                var result = tcs.Task.Result;
+                var rtn = new QueueCommandResult
+                {
+                    UniqueId = result.UniqueId,
+                    StatusCode = (HttpStatusCode) result.StatusCode
+                };
+
+                return rtn;
+            }
+            catch (AggregateException e)
             {
-                UniqueId = result.UniqueId,
-                StatusCode = (HttpStatusCode) result.StatusCode
-            };
-
-            return rtn;
+                foreach (var ex in e.InnerExceptions)
+                {
+                    if (ex is TaskCanceledException)
+                    {
+                        // Task was cancelled!
+#if DEBUG
+                        Debug.WriteLine("Setting cancellation token for action {0} on dialogue {1}", command.Url, _actionRequestConsumer.DialogId);
+#endif       
+                    }
+                }
+                return null;
+            }
+            catch (DialogueClosedException dEx)
+            {
+                throw new DialogueClosedException()
+                {
+                    DialogueId = _actionRequestConsumer.DialogId
+                };
+            }
         }
 
         protected MessageFinalResponse OnAppDequeue(string message, IConsumer sender, ulong deliveryTag)
@@ -108,7 +168,7 @@ namespace AsterNET.ARI.Middleware.Queue
 				return MessageFinalResponse.Reject;
 
             // Complete the request flow back to the originating Process command
-            _openRequests[restResponse.UniqueId].SetResult(restResponse);
+            _openRequests[restResponse.UniqueId].TrySetResult(restResponse);
 
 	        return MessageFinalResponse.Accept;
         }
