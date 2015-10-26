@@ -24,6 +24,7 @@ namespace AsterNET.ARI.Middleware.Queue
         internal Assembly Asm;
 
         public event EventHandler<BrokerSession> OnNewDialogue;
+        public event EventHandler<Guid> OnDialogueClosed;
 		/// <summary>
 		/// ActiveDialogueLimit restricts the number of active dialogue on the client to rejecting (with requeue)
 		/// any new dialogues that are presentde after the limit has been reached. Once there is room for new
@@ -110,6 +111,12 @@ namespace AsterNET.ARI.Middleware.Queue
         protected void OnError(Exception ex, IConsumer sender, ulong deliveryTag)
         {
             Console.WriteLine(ex.Message);
+        }
+
+
+        internal void DialogueClosed(Guid dialogueId)
+        {
+            OnDialogueClosed?.Invoke(this, dialogueId);
         }
     }
 }
