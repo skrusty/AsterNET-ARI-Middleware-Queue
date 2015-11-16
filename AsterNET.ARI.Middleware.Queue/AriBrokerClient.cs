@@ -25,6 +25,8 @@ namespace AsterNET.ARI.Middleware.Queue
 
         public event EventHandler<BrokerSession> OnNewDialogue;
         public event EventHandler<Guid> OnDialogueClosed;
+        public event EventHandler<Guid> OnDialogueRejected;
+
 		/// <summary>
 		/// ActiveDialogueLimit restricts the number of active dialogue on the client to rejecting (with requeue)
 		/// any new dialogues that are presentde after the limit has been reached. Once there is room for new
@@ -75,17 +77,20 @@ namespace AsterNET.ARI.Middleware.Queue
 #if DEBUG
             Debug.WriteLine(message);
 #endif
-
-			// Check Dialogue Limit
+            
+            // A new instance has been passed to us
+            var newInstance =
+                (NewDialogInfo) JsonConvert.DeserializeObject(message, typeof (NewDialogInfo));
+			
+            // Check Dialogue Limit
 	        if (ActiveDialogs.Count >= ActiveDialogueLimit)
 	        {
 		        Debug.WriteLine("Rejected new dialogue due to ActiveDialogueLimit ({0}) being exceeded {1}", ActiveDialogueLimit, ActiveDialogs.Count);
-		        return MessageFinalResponse.RejectWithReQueue; // Requeue dialogue
+	            OnOnDialogueRejected(Guid.Parse(newInstance.DialogId));
+                return MessageFinalResponse.RejectWithReQueue; // Requeue dialogue
 	        }
 
-	        // A new instance has been passed to us
-            var newInstance =
-                (NewDialogInfo) JsonConvert.DeserializeObject(message, typeof (NewDialogInfo));
+	        
             
             // Create new message queues
             var newApp = new BrokerSession(
@@ -117,6 +122,11 @@ namespace AsterNET.ARI.Middleware.Queue
         internal void DialogueClosed(Guid dialogueId)
         {
             OnDialogueClosed?.Invoke(this, dialogueId);
+        }
+
+        protected virtual void OnOnDialogueRejected(Guid e)
+        {
+            OnDialogueRejected?.Invoke(this, e);
         }
     }
 }
