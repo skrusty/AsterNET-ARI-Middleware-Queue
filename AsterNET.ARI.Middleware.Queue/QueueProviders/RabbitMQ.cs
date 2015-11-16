@@ -15,30 +15,20 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
         private readonly RabbitMqOptions _appQueueOptions;
         private readonly ConnectionFactory _rmqConnection;
 
-        public RabbitMq(string amqp)
+        public RabbitMq(string amqp, 
+            RabbitMqOptions appQueueOptions = null, 
+            RabbitMqOptions diagQueueOptions = null,
+            bool useAutomaticRecovery = false)
         {
-            _rmqConnection = new ConnectionFactory {uri = new Uri(amqp)};
-            _dialogueQueueOptions = new RabbitMqOptions()
+            _rmqConnection = new ConnectionFactory {uri = new Uri(amqp), AutomaticRecoveryEnabled = useAutomaticRecovery};
+            var defaultQueueOptions = new RabbitMqOptions()
             {
                 AutoDelete = false,
                 Durable = true,
                 Exclusive = false
             };
-            _appQueueOptions = _dialogueQueueOptions;
-        }
-
-        public RabbitMq(string amqp, RabbitMqOptions options)
-        {
-            _rmqConnection = new ConnectionFactory { uri = new Uri(amqp) };
-            _dialogueQueueOptions = options;
-            _appQueueOptions = options;
-        }
-
-        public RabbitMq(string amqp, RabbitMqOptions appQueueOptions, RabbitMqOptions diagQueueOptions)
-        {
-            _rmqConnection = new ConnectionFactory { uri = new Uri(amqp) };
-            _appQueueOptions = appQueueOptions;
-            _dialogueQueueOptions = diagQueueOptions;
+            _appQueueOptions = appQueueOptions ?? defaultQueueOptions;
+            _dialogueQueueOptions = diagQueueOptions ?? defaultQueueOptions;
         }
 
         public IConsumer CreateAppConsumer(string applicationName)
