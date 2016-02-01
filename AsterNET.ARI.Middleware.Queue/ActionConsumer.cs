@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Net;
@@ -18,7 +19,17 @@ namespace AsterNET.ARI.Middleware.Queue
         private readonly Dictionary<string, TaskCompletionSource<CommandResult>> _openRequests;
         private readonly int _actionTimeout;
 
-        public ActionConsumer(IProducer actionRequestConsumer, IConsumer actionResponseProducer, int actionTimeout = 1000)
+        public ActionConsumer(IProducer actionRequestConsumer, IConsumer actionResponseProducer)
+        {
+            _actionRequestConsumer = actionRequestConsumer;
+            _actionResponseProducer = actionResponseProducer;
+            _actionTimeout = !string.IsNullOrEmpty(
+                ConfigurationManager.AppSettings["AsterNET.ARI.Middleware.Queue.ActionConsumer.Timeout"]) 
+                ? int.Parse(ConfigurationManager.AppSettings["AsterNET.ARI.Middleware.Queue.ActionConsumer.Timeout"]) : 1000;
+            _openRequests = new Dictionary<string, TaskCompletionSource<CommandResult>>();
+        }
+
+        public ActionConsumer(IProducer actionRequestConsumer, IConsumer actionResponseProducer, int actionTimeout)
         {
             _actionRequestConsumer = actionRequestConsumer;
             _actionResponseProducer = actionResponseProducer;
