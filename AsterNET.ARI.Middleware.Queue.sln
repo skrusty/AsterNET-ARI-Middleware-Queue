@@ -1,11 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.22310.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterNET.ARI.Middleware.Queue", "AsterNET.ARI.Middleware.Queue\AsterNET.ARI.Middleware.Queue.csproj", "{029E5389-F189-4202-A3D2-AA8DC9458FB6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueueTest", "QueueTestApp\QueueTest.csproj", "{716CCDD9-CF80-47B0-B830-090D36DFFA6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterNET.ARI.Middleware.Queue.RabbitMQ", "AsterNET.ARI.Middleware.Queue.RabbitMQ\AsterNET.ARI.Middleware.Queue.RabbitMQ.csproj", "{039B8A92-A697-43C9-B773-3269FDDCAA32}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsterNET.ARI.Middleware.Queue.NETStandard", "AsterNET.ARI.Middleware.Queue.NETStandard\AsterNET.ARI.Middleware.Queue.NETStandard.csproj", "{60A35E73-F1E2-485A-A41D-7A375A860912}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsterNET.ARI.Middleware.Queue.RabbitMQ.NETStandard", "AsterNET.ARI.Middleware.Queue.RabbitMQ.NETStandard\AsterNET.ARI.Middleware.Queue.RabbitMQ.NETStandard.csproj", "{8131B5DB-1571-4D51-B508-F0B05113BA3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,8 +27,23 @@ Global
 		{716CCDD9-CF80-47B0-B830-090D36DFFA6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{716CCDD9-CF80-47B0-B830-090D36DFFA6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{716CCDD9-CF80-47B0-B830-090D36DFFA6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{039B8A92-A697-43C9-B773-3269FDDCAA32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{039B8A92-A697-43C9-B773-3269FDDCAA32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{039B8A92-A697-43C9-B773-3269FDDCAA32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{039B8A92-A697-43C9-B773-3269FDDCAA32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60A35E73-F1E2-485A-A41D-7A375A860912}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60A35E73-F1E2-485A-A41D-7A375A860912}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60A35E73-F1E2-485A-A41D-7A375A860912}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60A35E73-F1E2-485A-A41D-7A375A860912}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8131B5DB-1571-4D51-B508-F0B05113BA3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8131B5DB-1571-4D51-B508-F0B05113BA3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8131B5DB-1571-4D51-B508-F0B05113BA3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8131B5DB-1571-4D51-B508-F0B05113BA3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B6AC6961-D351-444A-9C46-731DFA87019C}
 	EndGlobalSection
 EndGlobal

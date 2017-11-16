@@ -3,8 +3,9 @@ using System.Diagnostics;
 using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using AsterNET.ARI.Middleware.Queue.QueueProviders;
 
-namespace AsterNET.ARI.Middleware.Queue.QueueProviders
+namespace AsterNET.ARI.Middleware.Queue.RabbitMQ
 {
     /// <summary>
     /// 
@@ -20,7 +21,7 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
             RabbitMqOptions diagQueueOptions = null,
             bool useAutomaticRecovery = false)
         {
-            _rmqConnection = new ConnectionFactory {uri = new Uri(amqp), AutomaticRecoveryEnabled = useAutomaticRecovery};
+            _rmqConnection = new ConnectionFactory {Uri = new Uri(amqp), AutomaticRecoveryEnabled = useAutomaticRecovery};
             var defaultQueueOptions = new RabbitMqOptions()
             {
                 AutoDelete = false,
@@ -170,7 +171,7 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
             Connection = connection;
             QueueName = queueName;
 
-            CreateModel();
+            CreateModel();    
             Model.QueueDeclare(QueueName, options.Durable, options.Exclusive, options.AutoDelete, null);
         }
 
@@ -191,7 +192,10 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
                 throw new DialogueClosedException();
             var body = Encoding.UTF8.GetBytes(message);
 
-            Model.BasicPublish("", QueueName, null, body);
+            lock (Model)
+            {
+                Model.BasicPublish("", QueueName, null, body);
+            }
         }
 
         public void Close()
@@ -214,7 +218,10 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
         {
             try
             {
-                Model.QueueDeclarePassive(QueueName);
+                lock (Model)
+                {
+                    Model.QueueDeclarePassive(QueueName);
+                }
                 return true;
             }
             catch
@@ -222,11 +229,6 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
                 return false;
             }
         }
-    }
-
-    public class DialogueClosedException : Exception
-    {
-        public string DialogueId { get; set; }
     }
 
     public class RabbitMqOptions

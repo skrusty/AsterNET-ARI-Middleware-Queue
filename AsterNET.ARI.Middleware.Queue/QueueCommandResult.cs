@@ -9,6 +9,7 @@ namespace AsterNET.ARI.Middleware.Queue
     {
         public string UniqueId { get; set; }
         public HttpStatusCode StatusCode { get; set; }
+        public byte[] RawData { get; set; }
     }
 
     /// <summary>

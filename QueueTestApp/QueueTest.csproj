@@ -64,6 +64,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AsterNET.ARI.Middleware.Queue.RabbitMQ\AsterNET.ARI.Middleware.Queue.RabbitMQ.csproj">
+      <Project>{039b8a92-a697-43c9-b773-3269fddcaa32}</Project>
+      <Name>AsterNET.ARI.Middleware.Queue.RabbitMQ</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AsterNET.ARI.Middleware.Queue\AsterNET.ARI.Middleware.Queue.csproj">
       <Project>{029e5389-f189-4202-a3d2-aa8dc9458fb6}</Project>
       <Name>AsterNET.ARI.Middleware.Queue</Name>

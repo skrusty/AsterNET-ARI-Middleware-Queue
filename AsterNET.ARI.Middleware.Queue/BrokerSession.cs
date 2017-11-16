@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.Remoting.Messaging;
 using AsterNET.ARI.Actions;
 using AsterNET.ARI.Middleware.Queue.QueueProviders;
 using AsterNET.ARI.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 namespace AsterNET.ARI.Middleware.Queue
 {
@@ -69,16 +69,11 @@ namespace AsterNET.ARI.Middleware.Queue
                 // to InternalEvent
 
                 if (type != null)
-                    InternalEvent.BeginInvoke(this,
-                        (Event) JsonConvert.DeserializeObject(jsonMsg.SelectToken("ari_body").Value<string>(), type),
-                        EventComplete,
-                        null);
+                    InternalEvent.Invoke(this,
+                        (Event) JsonConvert.DeserializeObject(jsonMsg.SelectToken("ari_body").Value<string>(), type));
                 else
-                    InternalEvent.BeginInvoke(this,
-                        (Event)
-                            JsonConvert.DeserializeObject(jsonMsg.SelectToken("ari_body").Value<string>(),
-                                typeof (Event)),
-                        EventComplete, null);
+                    InternalEvent.Invoke(this,
+                        (Event) JsonConvert.DeserializeObject(jsonMsg.SelectToken("ari_body").Value<string>()));
             }
             catch (Exception ex)
             {
@@ -97,27 +92,18 @@ namespace AsterNET.ARI.Middleware.Queue
 #endif
         }
 
-        private static void EventComplete(IAsyncResult result)
-        {
-            var ar = (AsyncResult) result;
-            var invokedMethod = (AriEventHandler) ar.AsyncDelegate;
-
-            try
-            {
-                invokedMethod.EndInvoke(result);
-            }
-            catch (Exception ex)
-            {
-                // Handle any exceptions that were thrown by the invoked method
-#if DEBUG
-                Debug.WriteLine("An Event Listener Threw Unhandled Exception: ", ex.Message);
-#endif
-            }
-        }
-
         private void ARIClient_internalEvent(IAriClient sender, Event e)
         {
-            FireEvent(e.Type, e, sender);
+            try
+            {
+                Task.Run(() =>
+                {
+                    FireEvent(e.Type, e, sender);
+                });
+            }catch(Exception ex)
+            {
+                Debug.WriteLine("An Event Listener Threw Unhandled Exception: ", ex.Message);
+            }
         }
 
         public void Start()

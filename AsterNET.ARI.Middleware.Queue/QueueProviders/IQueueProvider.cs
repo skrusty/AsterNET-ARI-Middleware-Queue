@@ -67,4 +67,9 @@ namespace AsterNET.ARI.Middleware.Queue.QueueProviders
         void Close();
 	    void Terminate();
     }
+
+    public class DialogueClosedException : Exception
+    {
+        public string DialogueId { get; set; }
+    }
 }

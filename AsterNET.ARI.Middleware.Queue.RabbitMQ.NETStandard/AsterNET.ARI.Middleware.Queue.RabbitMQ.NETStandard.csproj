@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\AsterNET.ARI.Middleware.Queue.RabbitMQ\RabbitMQ.cs" Link="RabbitMQ.cs" />
+    
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RabbitMQ.Client" Version="5.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AsterNET.ARI.Middleware.Queue.NETStandard\AsterNET.ARI.Middleware.Queue.NETStandard.csproj" />
+  </ItemGroup>
+
+</Project>

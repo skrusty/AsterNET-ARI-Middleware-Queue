@@ -3,6 +3,7 @@ using AsterNET.ARI;
 using AsterNET.ARI.Middleware.Queue;
 using AsterNET.ARI.Middleware.Queue.QueueProviders;
 using AsterNET.ARI.Models;
+using AsterNET.ARI.Middleware.Queue.RabbitMQ;
 
 namespace QueueTest
 {

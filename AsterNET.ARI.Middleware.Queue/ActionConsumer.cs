@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using AsterNET.ARI.Middleware.Queue.Messages;
+using AsterNET.ARI.Proxy.Common.Messages;
 using AsterNET.ARI.Middleware.Queue.QueueProviders;
 using Newtonsoft.Json;
 
@@ -23,9 +23,7 @@ namespace AsterNET.ARI.Middleware.Queue
         {
             _actionRequestConsumer = actionRequestConsumer;
             _actionResponseProducer = actionResponseProducer;
-            _actionTimeout = !string.IsNullOrEmpty(
-                ConfigurationManager.AppSettings["AsterNET.ARI.Middleware.Queue.ActionConsumer.Timeout"]) 
-                ? int.Parse(ConfigurationManager.AppSettings["AsterNET.ARI.Middleware.Queue.ActionConsumer.Timeout"]) : 1000;
+            _actionTimeout = 1000;
             _openRequests = new Dictionary<string, TaskCompletionSource<CommandResult>>();
         }
 
@@ -167,6 +165,22 @@ namespace AsterNET.ARI.Middleware.Queue
                     DialogueId = _actionRequestConsumer.DialogId
                 };
             }
+        }
+
+        public async Task<IRestCommandResult<T>> ProcessRestTaskCommand<T>(IRestCommand command) where T : new()
+        {
+            return await Task.Run(async () =>
+            {
+                return ProcessRestCommand<T>(command);
+            });
+        }
+
+        public async Task<IRestCommandResult> ProcessRestTaskCommand(IRestCommand command)
+        {
+            return await Task.Run(async () =>
+            {
+                return ProcessRestCommand(command);
+            });
         }
 
         protected MessageFinalResponse OnAppDequeue(string message, IConsumer sender, ulong deliveryTag)

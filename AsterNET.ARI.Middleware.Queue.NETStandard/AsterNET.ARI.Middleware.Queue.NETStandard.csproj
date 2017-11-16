@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AsterNET.ARI" Version="1.2.0" />
+    <PackageReference Include="System.Runtime" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\AsterNET.ARI.Middleware.Queue\ActionConsumer.cs" Link="ActionConsumer.cs" />
+    <Compile Include="..\AsterNET.ARI.Middleware.Queue\AriBrokerClient.cs" Link="AriBrokerClient.cs" />
+    <Compile Include="..\AsterNET.ARI.Middleware.Queue\BrokerSession.cs" Link="BrokerSession.cs" />
+    <Compile Include="..\AsterNET.ARI.Middleware.Queue\QueueCommand.cs" Link="QueueCommand.cs" />
+    <Compile Include="..\AsterNET.ARI.Middleware.Queue\QueueCommandResult.cs" Link="QueueCommandResult.cs" />
+    <Compile Include="..\AsterNET.ARI.Middleware.Queue\Helper\QueryStringBuilder.cs" Link="Helper\QueryStringBuilder.cs" />
+    <Compile Include="..\AsterNET.ARI.Middleware.Queue\QueueProviders\IQueueProvider.cs" Link="QueueProviders\IQueueProvider.cs" />
+    <Reference Include="AsterNET.ARI.Proxy.Common.NetStandard">
+      <HintPath>..\..\AsterNET.ARI.Proxy\AsterNET.ARI.Proxy.Common.NetStandard\bin\Release\netstandard2.0\AsterNET.ARI.Proxy.Common.NetStandard.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

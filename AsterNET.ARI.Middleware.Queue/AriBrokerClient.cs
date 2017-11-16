@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using AsterNET.ARI.Middleware.Queue.Messages;
+using AsterNET.ARI.Proxy.Common.Messages;
 using AsterNET.ARI.Middleware.Queue.QueueProviders;
 using Newtonsoft.Json;
 
