@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/skrusty/AsterNET-ARI-Middleware-Queue.svg?branch=master)](https://travis-ci.org/skrusty/AsterNET-ARI-Middleware-Queue)
 # AsterNET-ARI-Middleware-Queue
 A queue middleware implementation for AsterNET.ARI allowing you to use AsterNET.ARI with Ari Proxies like go-ari-proxy.
 
